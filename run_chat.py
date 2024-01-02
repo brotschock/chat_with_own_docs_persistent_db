@@ -22,7 +22,7 @@ class AnswerConversationBufferMemory(ConversationBufferMemory):
 
 def get_conversation_chain():
     embeddings = OpenAIEmbeddings()
-    index = pinecone.Index('jakobs-books')
+    index = pinecone.Index('my-books')
 
     vectorstore = Pinecone(index, embeddings, "text")
     model_name = os.getenv("MODEL_NAME")  # e.g. 'gpt-4-1106-preview' - costs  $0.01  / 1K tokens

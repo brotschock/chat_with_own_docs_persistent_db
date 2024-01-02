@@ -11,7 +11,7 @@ def main():
 
     print(api_key + "    " + env)
     pinecone.init(api_key=api_key, environment=env)
-    index_name = 'jakobs-books'
+    index_name = 'my-books'
     if index_name in pinecone.list_indexes():
         pinecone.delete_index(index_name)
     # we create a new index
