@@ -27,7 +27,8 @@ def main():
         chunk_overlap=200,
         length_function=len
     ))
-    vectorstore = Pinecone.from_documents(chunks, embeddings, index_name='my-books')
+    index_name = os.getenv("PINECONE_INDEX_NAME")
+    vectorstore = Pinecone.from_documents(chunks, embeddings, index_name=index_name)
 
 
 if __name__ == "__main__":
