@@ -9,6 +9,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import Pinecone
 from langchain.llms import HuggingFaceHub
+from langchain_community.llms import Replicate
 
 
 # from langchain.globals import set_verbose, set_debug
@@ -27,14 +28,18 @@ def get_conversation_chain():
     index = pinecone.Index(index_name)
 
     vectorstore = Pinecone(index, embeddings, "text")
-    model_name = os.getenv("MODEL_NAME")  # e.g. 'gpt-4-1106-preview' - costs  $0.01  / 1K tokens
-    llm = ChatOpenAI(model=model_name)
+    # model_name = os.getenv("MODEL_NAME")  # e.g. 'gpt-4-1106-preview' - costs  $0.01  / 1K tokens
+    # llm = ChatOpenAI(model=model_name)
     # llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature": 0.5, "max_length": 1024})
+    llm = Replicate(
+        model="meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+        model_kwargs={"temperature": 0.75, "max_length": 500, "top_p": 1},
+    )
     memory = AnswerConversationBufferMemory(memory_key="chat_history", return_messages=True)
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
         # some k limit necessary for google/flan because of input size restrictions
-        retriever=vectorstore.as_retriever(search_kwargs={"k": 2}),
+        retriever=vectorstore.as_retriever(search_kwargs={"k": 4}),
         memory=memory,
         return_source_documents=True
     )
