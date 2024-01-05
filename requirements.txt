@@ -41,6 +41,7 @@ pinecone-client==2.2.4
 protobuf==3.20.3
 pydantic==2.5.3
 pydantic_core==2.14.6
+pypdfium2==4.25.0
 python-dateutil==2.8.2
 python-dotenv==1.0.0
 PyYAML==6.0.1
