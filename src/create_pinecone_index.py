@@ -1,9 +1,11 @@
 import time
 import pinecone
 import os
+from dotenv import  load_dotenv
 
 
 def main():
+    load_dotenv()
     # Load Pinecone API key
     api_key = os.getenv('PINECONE_API_KEY')
     # Set Pinecone environment. Find next to API key in console

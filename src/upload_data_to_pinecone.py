@@ -22,11 +22,14 @@ def main():
     file_path = os.getenv("FILE_PATH")
     file_name = os.getenv("FILE_NAME")
     chunks = PyPDFium2Loader(file_path=file_path + file_name).load_and_split(CharacterTextSplitter(
-        separator=". ",
+        separator="\n",
         chunk_size=1000,
         chunk_overlap=200,
         length_function=len
     ))
+    book_title = file_name.replace(".pdf", "")
+    for i in range(len(chunks)):
+        chunks[i].page_content += "\n\n" + book_title + "    Page: " + str(chunks[i].metadata["page"])
     index_name = os.getenv("PINECONE_INDEX_NAME")
     vectorstore = Pinecone.from_documents(chunks, embeddings, index_name=index_name)
 
