@@ -16,7 +16,7 @@ def main():
 
     print(api_key + "    " + env)
     pinecone = Pinecone(api_key=api_key)
-    spec = ServerlessSpec(cloud='aws', region='us-west-2') # serverless is currently only available in us-west-2
+    spec = ServerlessSpec(cloud='aws', region='us-west-2')  # serverless is currently only available in us-west-2
     index_name = "jakobs-test-index"
     if index_name in pinecone.list_indexes():
         pinecone.delete_index(index_name)

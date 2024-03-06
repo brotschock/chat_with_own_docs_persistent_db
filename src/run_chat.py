@@ -1,17 +1,18 @@
 import os
 from typing import Dict, Any
 
-import pinecone
 from dotenv import load_dotenv
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import Pinecone
-from langchain.llms import HuggingFaceHub
 from langchain_community.llms import Replicate
 from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
+from pinecone import Pinecone, ServerlessSpec
+from langchain_pinecone import PineconeVectorStore
 
+use_serverless = True
 
 from langchain.globals import set_verbose, set_debug
 set_debug(True)
@@ -24,11 +25,16 @@ class AnswerConversationBufferMemory(ConversationBufferMemory):
 
 
 def get_conversation_chain():
+    load_dotenv()
     embeddings = OpenAIEmbeddings()
     index_name = os.getenv("PINECONE_INDEX_NAME")
+    api_key = os.getenv("PINECONE_API_KEY")
+    print(api_key)
+    spec = ServerlessSpec(cloud='aws', region='us-west-2')
+    pinecone = Pinecone(api_key=api_key)
     index = pinecone.Index(index_name)
 
-    vectorstore = Pinecone(index, embeddings, "text")
+    vectorstore = PineconeVectorStore(index, embeddings, "text")
     model_name = os.getenv("MODEL_NAME")  # e.g. 'gpt-4-1106-preview' - costs  $0.01  / 1K tokens
     chat_gpt = ChatOpenAI(model=model_name)
     # flan = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature": 0.5, "max_length": 1024})
