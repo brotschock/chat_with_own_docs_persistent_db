@@ -38,7 +38,7 @@ def get_conversation_chain():
     )
     llm = chat_gpt
     memory = AnswerConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    qa_system_template = """Always answer in German! If you cannot get the answer from the following context answer with: 'Das kann ich aus deinen Dokumenten leider nicht beantworten.'
+    qa_system_template = """Always answer in German! Always add a hilarious joke! If you cannot get the answer from the following context answer with: 'Das kann ich aus deinen Dokumenten leider nicht beantworten.'
     ----------------
     {context}"""
     messages = [
