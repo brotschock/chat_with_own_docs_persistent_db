@@ -1,22 +1,17 @@
 import os
+from uuid import uuid4
 
-import pinecone
+from pinecone import Pinecone
 from dotenv import load_dotenv
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores import Pinecone
 from langchain_community.document_loaders import PyPDFium2Loader
 
 
 def main():
     # Load Pinecone API key
     api_key = os.getenv('PINECONE_API_KEY')
-    # Set Pinecone environment. Find next to API key in console
-    env = os.getenv('PINECONE_ENVIRONMENT')
-
-    pinecone.init(api_key=api_key, environment=env)
-
-    embeddings = OpenAIEmbeddings()  # ada is OpenAI's only embedding model (very cheap)
+    pinecone = Pinecone(api_key=api_key)
 
     load_dotenv()
     file_path = os.getenv("FILE_PATH")
@@ -28,10 +23,22 @@ def main():
         length_function=len
     ))
     book_title = file_name.replace(".pdf", "")
-    for i in range(len(chunks)):
-        chunks[i].page_content += "\n\n" + book_title + "    Page: " + str(chunks[i].metadata["page"])
-    index_name = os.getenv("PINECONE_INDEX_NAME")
-    vectorstore = Pinecone.from_documents(chunks, embeddings, index_name=index_name)
+
+    model_name = 'text-embedding-ada-002'
+
+    embed = OpenAIEmbeddings(
+        model=model_name,
+        openai_api_key=os.getenv("OPENAI_API_KEY")
+    )
+
+    # create individual metadata dicts for each chunk
+    metadata_dicts = [{
+        "chunk": j, "text": chunk.page_content, "book_title": book_title, "page": chunk.metadata["page"]
+    } for j, chunk in enumerate(chunks)]
+    ids = [str(uuid4()) for _ in range(len(chunks))]
+    embeds = embed.embed_documents([chunk.page_content for chunk in chunks])
+    with pinecone.Index(os.getenv("PINECONE_INDEX_NAME")) as index:
+        index.upsert(vectors=zip(ids, embeds, metadata_dicts))
 
 
 if __name__ == "__main__":

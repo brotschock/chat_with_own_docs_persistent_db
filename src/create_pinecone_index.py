@@ -11,13 +11,9 @@ def main():
     load_dotenv()
     # Load Pinecone API key
     api_key = os.getenv('PINECONE_API_KEY')
-    # Set Pinecone environment. Find next to API key in console
-    env = os.getenv('PINECONE_ENVIRONMENT')
-
-    print(api_key + "    " + env)
     pinecone = Pinecone(api_key=api_key)
     spec = ServerlessSpec(cloud='aws', region='us-west-2')  # serverless is currently only available in us-west-2
-    index_name = "jakobs-test-index"
+    index_name = os.getenv('PINECONE_INDEX_NAME')
     if index_name in pinecone.list_indexes():
         pinecone.delete_index(index_name)
     # we create a new index

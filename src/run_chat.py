@@ -5,16 +5,16 @@ from dotenv import load_dotenv
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
+from langchain.globals import set_verbose, set_debug
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import Pinecone
-from langchain_community.llms import Replicate
 from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
-from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone, ServerlessSpec
 
 use_serverless = True
 
-from langchain.globals import set_verbose, set_debug
+
 set_debug(True)
 set_verbose(True)
 
@@ -29,7 +29,6 @@ def get_conversation_chain():
     embeddings = OpenAIEmbeddings()
     index_name = os.getenv("PINECONE_INDEX_NAME")
     api_key = os.getenv("PINECONE_API_KEY")
-    print(api_key)
     spec = ServerlessSpec(cloud='aws', region='us-west-2')
     pinecone = Pinecone(api_key=api_key)
     index = pinecone.Index(index_name)
@@ -37,14 +36,9 @@ def get_conversation_chain():
     vectorstore = PineconeVectorStore(index, embeddings, "text")
     model_name = os.getenv("MODEL_NAME")  # e.g. 'gpt-4-1106-preview' - costs  $0.01  / 1K tokens
     chat_gpt = ChatOpenAI(model=model_name)
-    # flan = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature": 0.5, "max_length": 1024})
-    llama = Replicate(
-        model="meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-        model_kwargs={"temperature": 0.25, "max_length": 500, "top_p": 1},
-    )
     llm = chat_gpt
     memory = AnswerConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    qa_system_template = """Always answer in German! Always add a hilarious joke! If you cannot get the answer from the following context answer with: 'Das kann ich aus deinen Dokumenten leider nicht beantworten.'
+    qa_system_template = """Always answer in German! If you cannot get the answer from the following context answer with: 'Das kann ich aus deinen Dokumenten leider nicht beantworten.'
     ----------------
     {context}"""
     messages = [
